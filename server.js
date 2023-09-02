@@ -1,27 +1,37 @@
 const express = require('express');
+const path = require('path');
 
 const app = express();
 
+app.use((req, res, next) => {
+  const forbiddenPath = '/user/';
+  if (req.path.startsWith(forbiddenPath)) {
+    return res.sendFile(path.join(__dirname, '/views/forbidden.html'));
+  }
+  next();
+});
+
+app.use((req, res, next) => {
+  res.show = (name) => {
+    res.sendFile(path.join(__dirname, `/views/${name}`));
+  };
+  next();
+});
+
+app.use(express.static(path.join(__dirname, '/public')));
+
 app.get('/', (req, res) => {
-    res.send('<h1>My first server!</h1>');
+  res.show('index.html');
 });
 
 app.get('/about', (req, res) => {
-    res.send('<h1>About</h1>');
+  res.show('about.html');
 });
 
-app.get('/contact', (req, res) => {
-    res.send('<h1>Contact</h1>');
-});
-
-app.get('/info', (req, res) => {
-    res.send('<h1>Info</h1>');
-});
-
-app.get('/history', (req, res) => {
-    res.send('<h1>History</h1>');
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, '/public/404.jpg'));
 });
 
 app.listen(8000, () => {
-    console.log('Server is running on port: 8000');
+  console.log('Server is running on port: 8000');
 });
